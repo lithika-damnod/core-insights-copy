@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from api.models.fcm_token import FCMToken
 from api.serializers.fcm_token_serializer import FCMTokenSerializer
-from api.services.fcm_service import FCMService
 
 class FCMTokenView(APIView): 
     permission_classes = [IsAuthenticated]
@@ -43,10 +42,3 @@ class FCMTokenView(APIView):
 
         except Exception as e: 
             return Response({"error": str(e)}, status=500)
-
-
-class Test(APIView): 
-    def post(self, request): 
-        tokens = FCMTokenSerializer.get_all_tokens()
-        response = FCMService.send_notification(tokens=tokens, title="Testing", body="Testing",)
-        return Response(response)
