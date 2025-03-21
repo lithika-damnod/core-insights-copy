@@ -1,17 +1,17 @@
 from rest_framework.permissions import BasePermission
 
-class isStandardUser(BasePermission): 
+class IsStandardUser(BasePermission): 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_standard() 
 
-class isMerchant(BasePermission): 
+class IsMerchant(BasePermission): 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_merchant() 
 
-class isLogistics(BasePermission): 
+class IsLogistics(BasePermission): 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_logistics() 
 
-class isDriver(BasePermission): 
+class IsDriver(BasePermission): 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_driver() 
