@@ -38,7 +38,7 @@ class RecipientSerializer(serializers.Serializer):
     last_name = serializers.CharField()
     telephone = serializers.CharField()
     address = AddressSerializer()
-    associated_with = serializers.UUIDField(source="customer")
+    associated_with = serializers.UUIDField(source="customer.id")
 
 class PackageSerializer(serializers.Serializer):
     weight = serializers.DecimalField(max_digits=6, decimal_places=2)

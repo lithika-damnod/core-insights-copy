@@ -7,6 +7,7 @@ from rest_framework import status
 from api.models.user import MerchantAdministrator
 from rest_framework.decorators import api_view
 from api.models.shipment import Shipment
+from api.models.address import Address
 from django.shortcuts import get_object_or_404
 
 class ShipmentView(APIView): 
@@ -51,12 +52,27 @@ class ShipmentById(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self, request, id): 
-        shipment = Shipment.objects.filter(id=str(id)).first()
-        if not shipment: 
-            return Response({"detail": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        shipment = get_object_or_404(Shipment, id=id)
         serializer = ShipmentSerializer(shipment)
         return Response(serializer.data)
+
+    def patch(self, request, id): 
+        shipment = get_object_or_404(Shipment, id=id)
+        serializer = ShipmentSerializer(shipment, data=request.data, partial=True)
+
+        if "address_id" in request.data: 
+            print("this runs! for address")
+            try:
+                address = Address.objects.get(id=request.data["address_id"])
+                shipment.address = address
+            except Address.DoesNotExist:
+                return Response({"detail": "Address not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if serializer.is_valid():
+            serializer.save()        
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id): 
         shipment = get_object_or_404(Shipment, id=id)
