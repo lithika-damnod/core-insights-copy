@@ -6,5 +6,4 @@ urlpatterns = [
     path('validate/', check_tracking_no_validity, name='check_tracking_no_validity'), 
     path('<str:id>/', ShipmentById.as_view(), name='shipment_by_id')
 ]
-    # path('<id>/'), # get, delete, put 
     # path('<id>/timeline'), # get, post, update, delete

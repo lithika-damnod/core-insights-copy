@@ -3,7 +3,7 @@ import string
 import uuid
 from datetime import datetime
 from django.db import models
-from api.models.user import StandardUser, MerchantAdministrator, LogisticsAdministrator
+from api.models.user import StandardUser, MerchantAdministrator, LogisticsAdministrator, Driver
 from api.models.address import Address
 from api.utils.estimates import estimate_delivery_date
 
@@ -41,6 +41,7 @@ class Shipment(models.Model):
     payment_status = models.CharField(max_length=50, choices=PaymentStatus.choices, null=True, blank=True)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True, related_name="driver")
 
     class Meta: 
         verbose_name = "Shipment" 
