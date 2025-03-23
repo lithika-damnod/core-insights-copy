@@ -5,14 +5,16 @@ from api.serializers.warehouse_serializer import WarehouseSerializer
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from api.models.warehouse import Warehouse
-from api.serializers.warehouse_serializer import WarehouseSerializer
+from api.models.user import LogisticsAdministrator
 
 class WarehouseView(APIView): 
     permission_classes = [IsLogistics]
     
     def get(self, request): 
-        user = request.user
-        return Response({"detail": "working properly and you're a logistics user"})
+        user = LogisticsAdministrator.objects.get(id=request.user.id)
+        warehouses = Warehouse.objects.filter(logistics=user)
+        serializer = WarehouseSerializer(warehouses, many=True)
+        return Response(serializer.data)
     
     def post(self, request): 
         serializer = WarehouseSerializer(data=request.data, context={'request': request})
