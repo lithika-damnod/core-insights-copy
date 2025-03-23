@@ -7,6 +7,7 @@ from rest_framework import status
 from api.models.user import MerchantAdministrator
 from rest_framework.decorators import api_view
 from api.models.shipment import Shipment
+import uuid
 
 class ShipmentView(APIView): 
     def get_permissions(self):
@@ -44,5 +45,18 @@ def check_tracking_no_validity(request):
         'validity': tracking_no_exists,
         'detail':  'Valid Tracking Number' if tracking_no_exists else 'Invalid Tracking Number'
     })    
+
+
+class ShipmentById(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self, request, id): 
+        shipment = Shipment.objects.filter(id=str(id)).first()
+        if not shipment: 
+            return Response({"detail": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ShipmentSerializer(shipment)
+        return Response(serializer.data)
+
 
 
