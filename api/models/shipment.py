@@ -22,7 +22,7 @@ class Shipment(models.Model):
 
     id = models.CharField(max_length=14, unique=True, editable=False, primary_key=True)     
     
-    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address")
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="shipments")
     delivery_date = models.DateField(default=estimate_delivery_date)
 
     customer = models.ForeignKey(StandardUser, on_delete=models.CASCADE, related_name="customer", null=True, blank=True)
