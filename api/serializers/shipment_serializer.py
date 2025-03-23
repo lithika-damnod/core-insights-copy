@@ -4,6 +4,7 @@ from api.models.shipment import Shipment
 from api.models.user import MerchantAdministrator, LogisticsAdministrator
 from api.models.address import Address
 from django.shortcuts import get_object_or_404
+from api.models.timeline import TimelineItem
 
 
 class AddressSerializer(serializers.ModelSerializer): 
@@ -100,3 +101,36 @@ class ShipmentSerializer(serializers.ModelSerializer):
     def get_payment(self, instance):
         return PaymentSerializer(instance).data
 
+
+class ShipmentBriefSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField(read_only=True)
+    merchant_name = serializers.SerializerMethodField()
+    logistics_name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField(read_only=True)
+
+    class Meta: 
+        model = Shipment
+        fields = ['status', 'id', 'delivery_date', 'merchant_name', 'logistics_name', 'description']
+
+        
+    def get_status(self, obj):     
+        latest_timeline_item = TimelineItem.objects.filter(shipment=obj).order_by('-shipment_sequence').first()
+        if latest_timeline_item:
+            return latest_timeline_item.status
+        return None
+
+    def get_merchant_name(self, obj):
+        if obj.merchant:
+            return obj.merchant.business_name
+        return None
+
+    def get_logistics_name(self, obj):
+        if obj.logistics:
+            return obj.logistics.logistics_name
+        return None
+
+    def get_description(self, obj):     
+        latest_timeline_item = TimelineItem.objects.filter(shipment=obj).order_by('-shipment_sequence').first()
+        if latest_timeline_item:
+            return latest_timeline_item.description
+        return None

@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsMerchant
-from api.serializers.shipment_serializer import ShipmentSerializer
+from api.serializers.shipment_serializer import ShipmentSerializer, ShipmentBriefSerializer
 from rest_framework import status
-from api.models.user import MerchantAdministrator
+from api.models.user import MerchantAdministrator, StandardUser, LogisticsAdministrator, Driver
 from rest_framework.decorators import api_view
 from api.models.shipment import Shipment
 from api.models.address import Address
@@ -18,7 +18,25 @@ class ShipmentView(APIView):
          
 
     def get(self, request): 
-        return Response({"detail": "anyone allowed here.."})
+        user = request.user
+
+        if user.is_standard():
+            customer = StandardUser.objects.get(id=user.id)
+            shipments = Shipment.objects.filter(customer=customer)
+        elif user.is_merchant():
+            merchant = MerchantAdministrator.objects.get(id=user.id)
+            shipments = Shipment.objects.filter(merchant=merchant)
+        elif user.is_logistics():
+            logistics = LogisticsAdministrator.objects.get(id=user.id)
+            shipments = Shipment.objects.filter(logistics=logistics)
+        elif user.is_driver():
+            driver = Driver.objects.get(id=user.id)
+            shipments = Shipment.objects.filter(driver=driver)
+        else:
+            return Response({"detail": "You do not have access to any shipments."}, status=403)        
+
+        serializer = ShipmentBriefSerializer(shipments, many=True) 
+        return Response(serializer.data)
 
     def post(self, request): 
         serializer = ShipmentSerializer(data=request.data)
@@ -61,7 +79,6 @@ class ShipmentById(APIView):
         serializer = ShipmentSerializer(shipment, data=request.data, partial=True)
 
         if "address_id" in request.data: 
-            print("this runs! for address")
             try:
                 address = Address.objects.get(id=request.data["address_id"])
                 shipment.address = address
