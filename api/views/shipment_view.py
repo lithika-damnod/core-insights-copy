@@ -5,6 +5,8 @@ from api.permissions import IsMerchant
 from api.serializers.shipment_serializer import ShipmentSerializer
 from rest_framework import status
 from api.models.user import MerchantAdministrator
+from rest_framework.decorators import api_view
+from api.models.shipment import Shipment
 
 class ShipmentView(APIView): 
     def get_permissions(self):
@@ -25,5 +27,22 @@ class ShipmentView(APIView):
             return Response(ShipmentSerializer(shipment).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+@api_view(['GET'])
+def check_tracking_no_validity(request): 
+    tracking_no = str(request.GET.get('id', None)).upper()
+
+    
+    if not tracking_no: 
+        return Response({'detail': 'id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    tracking_no_exists = Shipment.objects.filter(id=tracking_no).exists() 
+
+
+    return Response({
+        'validity': tracking_no_exists,
+        'detail':  'Valid Tracking Number' if tracking_no_exists else 'Invalid Tracking Number'
+    })    
+
 
