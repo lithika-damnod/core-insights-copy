@@ -7,7 +7,7 @@ from rest_framework import status
 from api.models.user import MerchantAdministrator
 from rest_framework.decorators import api_view
 from api.models.shipment import Shipment
-import uuid
+from django.shortcuts import get_object_or_404
 
 class ShipmentView(APIView): 
     def get_permissions(self):
@@ -57,6 +57,11 @@ class ShipmentById(APIView):
 
         serializer = ShipmentSerializer(shipment)
         return Response(serializer.data)
+
+    def delete(self, request, id): 
+        shipment = get_object_or_404(Shipment, id=id)
+        shipment.delete()
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
 
