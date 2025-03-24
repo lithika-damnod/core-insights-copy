@@ -98,3 +98,27 @@ class ShipmentById(APIView):
 
 
 
+@api_view(['POST'])
+def link_shipment(request, id): 
+    if not request.user.is_standard(): 
+        return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    if not id:
+        return Response({'detail': 'Shipment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    shipment = get_object_or_404(Shipment, id=id)
+
+    shipment.customer = StandardUser.objects.get(id=request.user.id)
+    shipment.save()
+    
+    # update the address by id
+    address = Address.objects.get(id=shipment.address.id)
+    address.associated_with = request.user
+    address.save()
+
+
+    return Response({})     
+
+        
+
+
